@@ -4,21 +4,23 @@ import genToken_Cookie from '../utils/generateToken.js'
 
 export const signup = async(req, res) => {
     try {
-        const {fullname,username,password,cPassword,gender}= req.body;
+        const { fullname , username , password , cPassword , gender }= req.body;
 
-        if(password!== cPassword)
+        if(password!== cPassword){
             return res.status(400).json({error:"passwords donot match!" })
-
+        }
         const user = await User.findOne({username});
+        if (user) {
         return res.status(400).json({error:"Username exists!"})
+        }
 
         //Hashing passwords here....
 
         const salt = await bcrypt.genSalt(10)
         const hashpassword = await bcrypt.hash(password,salt)
 
-        const boydp = `https://avatar.iran.liara.run/public/boy?username=${username}`
-        const girldp = `https://avatar.iran.liara.run/public/girl?username=${username}`
+        const boydp = `https://avatar.iran.liara.run/public/boy?username=${username}`;
+        const girldp = `https://avatar.iran.liara.run/public/girl?username=${username}`;
 
     const newUser= new User({
     fullname,
@@ -52,11 +54,12 @@ export const signup = async(req, res) => {
 }
 export const login =async(req,res) =>{
     try {
+        
         const {username,password}= req.body
         const user= await User.findOne({username})
-        const isPassword = await bcrypt.compare(password,user?.password ||"")
+        const isPassword = await bcrypt.compare(password, user?.password ||"")
 
-        if (! user || !isPassword){
+        if (! user || ! isPassword){
             res.status(400).json({error:"Invalid username or password.."})
         }
         genToken_Cookie(user._id,res);
